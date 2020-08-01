@@ -2,11 +2,23 @@
 
 ## Convert HEIC image format to JPG
 
-```batch
-@ECHO OFF
-setlocal enabledelayedexpansion
-for %%f in (.\*.heic) do (
-  set /p val=<%%f
-  magick convert "%%~nf.heic" "%%~nf.jpg"
-)
+```javascript
+function getFiles(pattern) {
+  return readdirSync(process.cwd())
+    .map((file) => resolve(process.cwd(), file))
+    .filter((file) => pattern.test(file));
+}
+
+function convertHeicFiles() {
+  getFiles(/\.heic$/i).map((file) => {
+    const command = `magick convert "${file}" "${file.replace(
+      extname(file),
+      ".jpg"
+    )}"`;
+    console.log(command);
+    execSync(command);
+  });
+}
+
+convertHeicFiles();
 ```
