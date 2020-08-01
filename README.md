@@ -26,3 +26,38 @@ function convertHeicFiles() {
 
 convertHeicFiles();
 ```
+
+## Rename image files based on image creation date
+
+```javascript
+const { execSync } = require("child_process");
+const { readdirSync, renameSync } = require("fs");
+const { resolve, extname, join, dirname } = require("path");
+
+function getDateTime(file) {
+  const command = `magick identify -format %[EXIF:DateTime] "${file}"`;
+  console.log(command);
+  return execSync(command, {
+    encoding: "utf8",
+  });
+}
+
+function getFiles(pattern) {
+  return readdirSync(process.cwd())
+    .map((file) => resolve(process.cwd(), file))
+    .filter((file) => pattern.test(file));
+}
+
+function renameToDateTime(file) {
+  const [year, month, day, hours, minutes, seconds] = getDateTime(file).split(
+    /[: ]/
+  );
+  const newName = join(
+    dirname(file),
+    `${year}-${month}-${day}T${hours}${minutes}${seconds}${extname(file)}`
+  );
+  renameSync(file, newName);
+}
+
+getFiles(/\.jpg$/i).forEach(renameToDateTime);
+```
